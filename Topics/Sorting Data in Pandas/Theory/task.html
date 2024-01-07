@@ -1,0 +1,111 @@
+<h2>Sorting Data in Pandas</h2>
+<div class="step-text">
+<p>In this topic, we'll cover advanced operations for sorting a Pandas Dataframe: sorting the rows by any column, by index values, and sorting the columns by their names.</p>
+<p>As always, we import <code class="language-python">pandas</code> and create a DataFrame from a dictionary:</p>
+<pre><code class="language-python">import pandas as pd
+goods = {
+    "type": ['PC', 'monitor', 'printer', 'notebook', 'PC'], 
+    "price": [450, 150, 175, 600, 500],
+    "quantity": [5, 2, 10, 15, 5],
+    "vendor_code": ['135', '960', '004', '420', '114'], 
+}
+df = pd.DataFrame(goods)
+df.head()</code></pre>
+<p>Output:</p>
+<pre><code class="language-no-highlight">       type  price  quantity vendor_code
+0        PC    450         5         135
+1   monitor    150         2         960
+2   printer    175        10         004
+3  notebook    600        15         420
+4        PC    500         5         114
+</code></pre>
+<p>This is a sample from storage data of an electronics retail company.</p>
+<h5 id="row-sorting">Row sorting</h5>
+<p>There are two main approaches: sort a DataFrame by row indices or sort it by columns. Let's start with the former one.</p>
+<p><strong>1.</strong> <strong>Sorting by index</strong></p>
+<p>Our sample DataFrame has the basic ordinal index and rows are already sorted (by default). So at first, we change the index with the method that you've learned in previous topics – <code class="language-python">set_index()</code>:</p>
+<pre><code class="language-python">df.set_index('vendor_code', inplace=True)
+df.head()</code></pre>
+<p>Output:</p>
+<pre><code class="language-no-highlight">                 type  price  quantity
+vendor_code                           
+135                PC    450         5
+960           monitor    150         2
+004           printer    175        10
+420          notebook    600        15
+114                PC    500         5
+</code></pre>
+<p>The <code class="language-python">vendor_code</code> column became the index column. Now let's use the Pandas <code class="language-python">sort_index()</code> method to sort all rows according to their index labels:</p>
+<pre><code class="language-python">df.sort_index()</code></pre>
+<p>Output:</p>
+<pre><code class="language-no-highlight">                 type  price  quantity
+vendor_code                           
+004           printer    175        10
+114                PC    500         5
+135                PC    450         5
+420          notebook    600        15
+960           monitor    150         2</code></pre>
+<p>Notice that the rows have been sorted lexicographically because of the string index. This method has the <code class="language-python">inplace</code> argument, and as we didn't change its default state (<code class="language-python">False</code>), the result is just being output. This means the row order of the DataFrame <code class="language-python">df</code> remains the same. The <code class="language-python">sort_index()</code> method can be very handy if your data has DateTime indices.</p>
+<p><strong>2. Sorting by a single column</strong></p>
+<p>Another way to sort the DataFrame/Series is to use the <code class="language-python">sort_values()</code> method. Let's take our initial example and sort it by <code class="language-python">price</code>:</p>
+<pre><code class="language-python">df.sort_values('price')</code></pre>
+<p>Output:</p>
+<pre><code class="language-no-highlight">       type  price  quantity vendor_code
+1   monitor    150         2         960
+2   printer    175        10         004
+0        PC    450         5         135
+4        PC    500         5         114
+3  notebook    600        15         420</code></pre>
+<p>As you can see, the table is now sorted by the <code class="language-python">price</code> column ascending. This is the default behavior of <code class="language-python">sort_values()</code>.</p>
+<p>Let's add some details. Like in many other methods, first of all, we get instant output because we didn't set the <code class="language-python">inplace</code> argument to <code class="language-python">True</code>. Secondly, note how we pass the name of the column for sorting — just a string with its name. If we need to sort by several columns, we should pass them as a Python list in the corresponding order. Lastly, the order of sorting is set by the argument <code class="language-python">ascending</code>, which is <code class="language-python">True</code> by default, as you can see. Now we'll play around with those settings.</p> <p>Suppose we want to look at our largest supplies. In such a case, we have to sort our data by the quantity column in descending order:</p>
+<pre><code class="language-python">df.sort_values('quantity', ascending=False)</code></pre>
+<p>Output:</p>
+<pre><code class="language-no-highlight">       type  price  quantity vendor_code
+3  notebook    600        15         420
+2   printer    175        10         004
+0        PC    450         5         135
+4        PC    500         5         114
+1   monitor    150         2         960</code></pre>
+<p>Ok, it's now sorted by the quantity and top-down.</p>
+<p><strong>3. Sorting by multiple columns</strong></p>
+<p>But what if we also need to sort by the <code class="language-python">price</code>, so more expensive units will be displayed first? Add the second sorting column:</p>
+<pre><code class="language-python">df.sort_values(['quantity', 'price'], ascending=False)</code></pre>
+<p>Output:</p>
+<pre><code class="language-no-highlight">       type  price  quantity vendor_code
+3  notebook    600        15         420
+2   printer    175        10         004
+4        PC    500         5         114
+0        PC    450         5         135
+1   monitor    150         2         960
+</code></pre>
+<p>Here the DataFrame is sorted by <code class="language-python">quantity</code> first and by <code class="language-python">price</code> second, and both sortings are descending.</p>
+<p>Let's look at the final example, where we set different sorting orders for chosen columns. This is the way to sort by the <code class="language-python">quantity</code> ascending and for <code class="language-python">price</code> descending:</p>
+<pre><code class="language-python">df.sort_values(['quantity', 'price'], ascending=[True, False])</code></pre>
+<p>Output:</p>
+<pre><code class="language-no-highlight">       type  price  quantity vendor_code
+1   monitor    150         2         960
+4        PC    500         5         114
+0        PC    450         5         135
+2   printer    175        10         004
+3  notebook    600        15         420</code></pre>
+<p>We got the desired result by setting the <code class="language-python">ascending</code> argument to a list of boolean values in the same order as the columns mentioned in the first argument.</p>
+<h5 id="column-sorting">Column sorting</h5>
+<p>Sometimes, in your data-rich future, you may encounter a table with a large number of unfamiliar columns. It would be very handy if something could arrange them in alphabetical order. And, of course, Pandas has this capability:</p>
+<pre><code class="language-python">df = df.reindex(sorted(df.columns), axis='columns')
+df.head()</code></pre>
+<p>Output:</p>
+<pre><code class="language-no-highlight">   price  quantity      type vendor_code
+0    450         5        PC         135
+1    150         2   monitor         960
+2    175        10   printer         004
+3    600        15  notebook         420
+4    500         5        PC         114</code></pre>
+<p>What has just happened here? <code class="language-python">reindex()</code> is a Pandas method that sets new labels along the selected axis. We pass the list of column labels presorted with the built-in Python function <code class="language-python">sorted()</code> as the first argument to achieve the desired result.</p>
+<h5 id="summary">Summary</h5>
+<p>Let's conclude what you've learned:</p>
+<ul>
+<li>how to sort DataFrame by index with <code class="language-python">sort_index()</code></li>
+<li>how to sort DataFrame by any column with <code class="language-python">sort_values()</code></li>
+<li>how to set columns in alphabetical order</li>
+</ul>
+</div>
